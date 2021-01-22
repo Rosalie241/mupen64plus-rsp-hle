@@ -46,6 +46,7 @@
 #define M64MSG_WARNING 3
 
 #include "Zilmar_Rsp.h"
+#include "Zilmar_Settings.h"
 #include <windows.h>
 #endif // !defined(ZILMAR_SPEC)
 
@@ -81,6 +82,9 @@ static void (*l_DebugCallback)(void *, int, const char *) = NULL;
 static void *l_DebugCallContext = NULL;
 static m64p_dynlib_handle l_CoreHandle = NULL;
 static int l_PluginInit = 0;
+#else
+static int16_t l_SettingsId_GraphicsHle = 0;
+static int16_t l_SettingsId_AudioHle = 0;
 #endif  // !defined(ZILMAR_SPEC)
 
 #if !defined(ZILMAR_SPEC)
@@ -468,6 +472,12 @@ EXPORT void CALL DllConfig(int hWnd)
 {
 }
 
+EXPORT void CALL PluginLoaded(void)
+{
+	l_SettingsId_GraphicsHle = FindSystemSettingId("HLE GFX");
+	l_SettingsId_AudioHle = FindSystemSettingId("HLE Audio");
+}
+
 #endif // !defined(ZILMAR_SPEC)
 
 EXPORT unsigned int CALL DoRspCycles(unsigned int Cycles)
@@ -524,8 +534,8 @@ EXPORT void CALL InitiateRSP(RSP_INFO Rsp_Info, unsigned int* CycleCount)
         l_InitiateRSP(Rsp_Info, CycleCount);
     }
 #else
-	g_hle.hle_gfx = 1;
-	g_hle.hle_aud = 0;
+	g_hle.hle_gfx = GetSystemSetting(l_SettingsId_GraphicsHle);
+	g_hle.hle_aud = GetSystemSetting(l_SettingsId_AudioHle);
 #endif // !defined(ZILMAR_SPEC)
 }
 

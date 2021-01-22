@@ -277,7 +277,10 @@ SOURCE = \
 	$(SRCDIR)/re2.c \
 	$(SRCDIR)/plugin.c
 
-ifneq ($(ZILMAR_SPEC), 1)
+ifeq ($(ZILMAR_SPEC), 1)
+  SOURCE += \
+		$(SRCDIR)/Zilmar_Settings.c
+else
   ifeq ($(OS), MINGW)
   SOURCE += \
 	  $(SRCDIR)/osal_dynamiclib_win32.c
