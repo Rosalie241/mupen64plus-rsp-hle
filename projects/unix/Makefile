@@ -151,6 +151,11 @@ else
   CFLAGS += -fno-PIC
 endif
 
+# Zilmar spec
+ifeq ($(ZILMAR_SPEC), 1)
+  CFLAGS += -DZILMAR_SPEC
+endif
+
 ifeq ($(BIG_ENDIAN), 1)
   CFLAGS += -DM64P_BIG_ENDIAN
 endif
@@ -182,24 +187,31 @@ ifeq ($(OS), OSX)
     endif
   endif
 endif
+ifeq ($(OS), MINGW)
+  ifeq ($(ZILMAR_SPEC), 1)
+    LDFLAGS += -static
+  endif
+endif
 
-# set mupen64plus core API header path
-ifneq ("$(APIDIR)","")
-  CFLAGS += "-I$(APIDIR)"
-else
-  TRYDIR = ../../../mupen64plus-core/src/api
-  ifneq ("$(wildcard $(TRYDIR)/m64p_types.h)","")
-    CFLAGS += -I$(TRYDIR)
+ifneq ($(ZILMAR_SPEC), 1)
+  # set mupen64plus core API header path
+  ifneq ("$(APIDIR)","")
+    CFLAGS += "-I$(APIDIR)"
   else
-    TRYDIR = /usr/local/include/mupen64plus
+    TRYDIR = ../../../mupen64plus-core/src/api
     ifneq ("$(wildcard $(TRYDIR)/m64p_types.h)","")
       CFLAGS += -I$(TRYDIR)
     else
-      TRYDIR = /usr/include/mupen64plus
+      TRYDIR = /usr/local/include/mupen64plus
       ifneq ("$(wildcard $(TRYDIR)/m64p_types.h)","")
         CFLAGS += -I$(TRYDIR)
       else
-        $(error Mupen64Plus API header files not found! Use makefile parameter APIDIR to force a location.)
+        TRYDIR = /usr/include/mupen64plus
+        ifneq ("$(wildcard $(TRYDIR)/m64p_types.h)","")
+          CFLAGS += -I$(TRYDIR)
+        else
+          $(error Mupen64Plus API header files not found! Use makefile parameter APIDIR to force a location.)
+        endif
       endif
     endif
   endif
@@ -265,12 +277,14 @@ SOURCE = \
 	$(SRCDIR)/re2.c \
 	$(SRCDIR)/plugin.c
 
-ifeq ($(OS), MINGW)
-SOURCE += \
-	$(SRCDIR)/osal_dynamiclib_win32.c
-else
-SOURCE += \
-	$(SRCDIR)/osal_dynamiclib_unix.c
+ifneq ($(ZILMAR_SPEC), 1)
+  ifeq ($(OS), MINGW)
+  SOURCE += \
+	  $(SRCDIR)/osal_dynamiclib_win32.c
+  else
+  SOURCE += \
+	  $(SRCDIR)/osal_dynamiclib_unix.c
+  endif
 endif
 
 # generate a list of object files build, make a temporary directory for them

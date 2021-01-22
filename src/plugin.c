@@ -30,6 +30,7 @@
 #include "hle_internal.h"
 #include "hle_external.h"
 
+#if !defined(ZILMAR_SPEC)
 #define M64P_PLUGIN_PROTOTYPES 1
 #include "m64p_common.h"
 #include "m64p_config.h"
@@ -38,6 +39,15 @@
 #include "m64p_types.h"
 
 #include "osal_dynamiclib.h"
+#else
+#define M64MSG_VERBOSE 0
+#define M64MSG_INFO 1
+#define M64MSG_ERROR 2
+#define M64MSG_WARNING 3
+
+#include "Zilmar_Rsp.h"
+#include <windows.h>
+#endif // !defined(ZILMAR_SPEC)
 
 #define CONFIG_API_VERSION       0x020100
 #define CONFIG_PARAM_VERSION     1.00
@@ -67,10 +77,13 @@ static void (*l_ProcessAlistList)(void) = NULL;
 static void (*l_ProcessRdpList)(void) = NULL;
 static void (*l_ShowCFB)(void) = NULL;
 static void (*l_DebugCallback)(void *, int, const char *) = NULL;
+#if !defined(ZILMAR_SPEC)
 static void *l_DebugCallContext = NULL;
 static m64p_dynlib_handle l_CoreHandle = NULL;
 static int l_PluginInit = 0;
+#endif  // !defined(ZILMAR_SPEC)
 
+#if !defined(ZILMAR_SPEC)
 static m64p_handle l_ConfigRspHle;
 static m64p_dynlib_handle l_RspFallback;
 static ptr_InitiateRSP l_InitiateRSP = NULL;
@@ -186,6 +199,7 @@ static void setup_rsp_fallback(const char* rsp_fallback_path)
 close_handle:
     osal_dynlib_close(handle);
 }
+#endif // !defined(ZILMAR_SPEC)
 
 static void DebugMessage(int level, const char *message, va_list args)
 {
@@ -196,7 +210,15 @@ static void DebugMessage(int level, const char *message, va_list args)
 
     vsprintf(msgbuf, message, args);
 
+#if !defined(ZILMAR_SPEC)
     (*l_DebugCallback)(l_DebugCallContext, level, msgbuf);
+#else
+	// does this work??
+	if (level == M64MSG_ERROR)
+	{
+		MessageBox(NULL, msgbuf, "RSP ERROR", MB_OK);
+	}
+#endif // !defined(ZILMAR_SPEC)
 }
 
 /* Global functions needed by HLE core */
@@ -275,14 +297,20 @@ void HleShowCFB(void* UNUSED(user_defined))
 
 int HleForwardTask(void* user_defined)
 {
+#if !defined(ZILMAR_SPEC)
     if (l_DoRspCycles == NULL)
+#endif // !defined(ZILMAR_SPEC)
         return -1;
 
+#if !defined(ZILMAR_SPEC)
     (*l_DoRspCycles)(-1);
+#endif // !defined(ZILMAR_SPEC)
     return 0;
 }
 
 
+
+#if !defined(ZILMAR_SPEC)
 /* DLL-exported functions */
 EXPORT m64p_error CALL PluginStartup(m64p_dynlib_handle CoreLibHandle, void *Context,
                                      void (*DebugCallback)(void *, int, const char *))
@@ -383,7 +411,9 @@ EXPORT m64p_error CALL PluginStartup(m64p_dynlib_handle CoreLibHandle, void *Con
     l_PluginInit = 1;
     return M64ERR_SUCCESS;
 }
+#endif // !defined(ZILMAR_SPEC)
 
+#if !defined(ZILMAR_SPEC)
 EXPORT m64p_error CALL PluginShutdown(void)
 {
     if (!l_PluginInit)
@@ -420,6 +450,25 @@ EXPORT m64p_error CALL PluginGetVersion(m64p_plugin_type *PluginType, int *Plugi
 
     return M64ERR_SUCCESS;
 }
+#else
+EXPORT void CALL CloseDLL(void)
+{
+}	
+
+EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo)
+{
+	PluginInfo->Version = 0x0101;
+	PluginInfo->Type = PLUGIN_TYPE_RSP;
+	strcpy(PluginInfo->Name, "Hacktarux/Azimer High-Level Emulation RSP Plugin");
+	PluginInfo->NormalMemory = 1;
+	PluginInfo->MemoryBswaped = 1;
+}
+
+EXPORT void CALL DllConfig(int hWnd)
+{
+}
+
+#endif // !defined(ZILMAR_SPEC)
 
 EXPORT unsigned int CALL DoRspCycles(unsigned int Cycles)
 {
@@ -454,11 +503,17 @@ EXPORT void CALL InitiateRSP(RSP_INFO Rsp_Info, unsigned int* CycleCount)
              NULL);
 
     l_CheckInterrupts = Rsp_Info.CheckInterrupts;
+#if !defined(ZILMAR_SPEC)
     l_ProcessDlistList = Rsp_Info.ProcessDlistList;
     l_ProcessAlistList = Rsp_Info.ProcessAlistList;
+#else
+	l_ProcessDlistList = Rsp_Info.ProcessDlist;
+	l_ProcessAlistList = Rsp_Info.ProcessAlist;
+#endif // !defined(ZILMAR_SPEC)
     l_ProcessRdpList = Rsp_Info.ProcessRdpList;
     l_ShowCFB = Rsp_Info.ShowCFB;
 
+#if !defined(ZILMAR_SPEC)
     setup_rsp_fallback(ConfigGetParamString(l_ConfigRspHle, RSP_HLE_CONFIG_FALLBACK));
 
     g_hle.hle_gfx = ConfigGetParamBool(l_ConfigRspHle, RSP_HLE_CONFIG_HLE_GFX);
@@ -468,14 +523,20 @@ EXPORT void CALL InitiateRSP(RSP_INFO Rsp_Info, unsigned int* CycleCount)
     if (l_InitiateRSP) {
         l_InitiateRSP(Rsp_Info, CycleCount);
     }
+#else
+	g_hle.hle_gfx = 1;
+	g_hle.hle_aud = 0;
+#endif // !defined(ZILMAR_SPEC)
 }
 
 EXPORT void CALL RomClosed(void)
 {
     g_hle.cached_ucodes.count = 0;
 
+#if !defined(ZILMAR_SPEC)
     /* notify fallback plugin */
     if (l_RomClosed) {
         l_RomClosed();
     }
+#endif // !defined(ZILMAR_SPEC)
 }
