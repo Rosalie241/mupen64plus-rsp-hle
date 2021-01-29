@@ -32,7 +32,7 @@
     <ProjectConfiguration Include="Zilmar_Release|x64">
       <Configuration>Zilmar_Release</Configuration>
       <Platform>x64</Platform>
-    </ProjectConfiguration>	
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2EC7CEE3-C7A7-4F2E-B2C8-4DF6AFEC3E9A}</ProjectGuid>
@@ -125,7 +125,7 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Zilmar_Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup> 
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -258,11 +258,16 @@
     <ClCompile Include="..\..\src\memory.c" />
     <ClCompile Include="..\..\src\mp3.c" />
     <ClCompile Include="..\..\src\musyx.c" />
-    <ClCompile Include="..\..\src\osal_dynamiclib_win32.c" />
+    <ClCompile Include="..\..\src\osal_dynamiclib_win32.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Zilmar_Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Zilmar_Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Zilmar_Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Zilmar_Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\src\plugin.c" />
     <ClCompile Include="..\..\src\re2.c" />
-	<ClCompile Condition="'$(Configuration)'=='Zilmar_Debug'" Include="..\..\src\Zilmar_Settings.c" />
-	<ClCompile Condition="'$(Configuration)'=='Zilmar_Release'" Include="..\..\src\Zilmar_Settings.c" />
+    <ClCompile Condition="'$(Configuration)'=='Zilmar_Debug'" Include="..\..\src\Zilmar_Settings.c" />
+    <ClCompile Condition="'$(Configuration)'=='Zilmar_Release'" Include="..\..\src\Zilmar_Settings.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\alist.h" />
@@ -273,12 +278,17 @@
     <ClInclude Include="..\..\src\hle_external.h" />
     <ClInclude Include="..\..\src\hle_internal.h" />
     <ClInclude Include="..\..\src\memory.h" />
-    <ClInclude Include="..\..\src\osal_dynamiclib.h" />
+    <ClInclude Include="..\..\src\osal_dynamiclib.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Zilmar_Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Zilmar_Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Zilmar_Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Zilmar_Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\..\src\ucodes.h" />
-	<ClInclude Condition="'$(Configuration)'=='Zilmar_Debug'" Include="..\..\src\Zilmar_Rsp.h" />
-	<ClInclude Condition="'$(Configuration)'=='Zilmar_Release'" Include="..\..\src\Zilmar_Rsp.h" />
-	<ClInclude Condition="'$(Configuration)'=='Zilmar_Debug'" Include="..\..\src\Zilmar_Settings.h" />
-	<ClInclude Condition="'$(Configuration)'=='Zilmar_Release'" Include="..\..\src\Zilmar_Settings.h" />
+    <ClInclude Condition="'$(Configuration)'=='Zilmar_Debug'" Include="..\..\src\Zilmar_Rsp.h" />
+    <ClInclude Condition="'$(Configuration)'=='Zilmar_Release'" Include="..\..\src\Zilmar_Rsp.h" />
+    <ClInclude Condition="'$(Configuration)'=='Zilmar_Debug'" Include="..\..\src\Zilmar_Settings.h" />
+    <ClInclude Condition="'$(Configuration)'=='Zilmar_Release'" Include="..\..\src\Zilmar_Settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
